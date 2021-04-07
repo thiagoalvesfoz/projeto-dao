@@ -10,7 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
 
@@ -44,7 +47,7 @@ class SellerDaoJDBC implements SellerDAO {
         ResultSet rs = null;
 
         String sql = "SELECT seller.*, department.name as depName FROM seller " +
-                "INNER JOIN department ON department.id = seller.department_id WHERE seller.id = ?";
+                "INNER JOIN department ON department.id = seller.department_id WHERE seller.id = ?;";
 
         try {
             st = conn.prepareStatement(sql);
@@ -56,6 +59,44 @@ class SellerDaoJDBC implements SellerDAO {
             }
 
             return null;
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        } finally {
+            Database.closeStatement(st);
+            Database.closeResultSet(rs);
+        }
+    }
+
+    @Override
+    public List<Seller> findByDepartment(Department department) {
+
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        String sql = "SELECT seller.*, department.name as depName FROM seller " +
+                "INNER JOIN department ON department.id = seller.department_id " +
+                "WHERE seller.department_id = ? ORDER BY name;";
+
+        try {
+            st = conn.prepareStatement(sql);
+            st.setInt(1, department.getId());
+            rs = st.executeQuery();
+
+            List<Seller> listOfSellers = new ArrayList<>();
+            Map<Integer, Department> map = new HashMap<>();
+
+            while (rs.next()) {
+                Department dep = map.get(rs.getInt("department_id"));
+
+                if (dep == null) {
+                    dep = getDepartment(rs);
+                }
+
+                listOfSellers.add(getSeller(rs, dep));
+            }
+
+            return listOfSellers;
+
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         } finally {
@@ -86,5 +127,4 @@ class SellerDaoJDBC implements SellerDAO {
                 rs.getString("depName")
         );
     }
-
 }
