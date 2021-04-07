@@ -40,11 +40,12 @@ class SellerDaoJDBC implements SellerDAO {
     @Override
     public Seller findById(Integer id) {
 
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
         String sql = "SELECT seller.*, department.name as depName FROM seller " +
                 "INNER JOIN department ON department.id = seller.department_id WHERE seller.id = ?";
 
-        PreparedStatement st = null;
-        ResultSet rs = null;
         try {
             st = conn.prepareStatement(sql);
             st.setInt(1, id);
