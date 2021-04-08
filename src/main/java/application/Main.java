@@ -1,5 +1,6 @@
 package application;
 
+import application.model.dao.DepartmentDAO;
 import application.model.dao.SellerDAO;
 import application.model.dao.impl.DaoFactory;
 import application.model.entities.Department;
@@ -11,7 +12,11 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
+        executeDaoImplementationSellers();
+        executeDaoImplementationsDepartments();
+    }
 
+    public static void executeDaoImplementationSellers() {
         SellerDAO sellerDao = DaoFactory.createSellerDao();
 
         System.out.println("##### BUSCA DE SELLER POR ID");
@@ -38,11 +43,11 @@ public class Main {
         );
 
         System.out.println("Antes de salvar: " + sellerToSave);
-        System.out.println("Depois de salvo: " + sellerDao.insert(sellerToSave));
+        System.out.println("Depois de salvo: " + sellerDao.save(sellerToSave));
 
         System.out.println("\n##### ATUALIZAR SELLER");
         sellerToSave.setDepartment(new Department(1, null));
-        sellerDao.update(sellerToSave);
+        sellerDao.save(sellerToSave);
         System.out.println("Seller atualizado para: " + sellerDao.findById(sellerToSave.getId()));
 
         System.out.println("\n##### DELETAR SELLER");
@@ -50,6 +55,31 @@ public class Main {
         System.out.println("Lista de sellers após deletar");
         sellerList = sellerDao.findAll();
         sellerList.forEach(System.out::println);
+    }
+
+    public static void executeDaoImplementationsDepartments() {
+        DepartmentDAO departmentDAO = DaoFactory.createDepartmentDao();
+
+
+        System.out.println("##### BUSCA DE DEPARTMENT POR ID");
+        System.out.println(departmentDAO.findById(1));
+
+        System.out.println("\n##### BUSCA TODOS OS DEPARTMENTs");
+        departmentDAO.findAll().forEach(System.out::println);
+
+        System.out.println("\n##### INSERIR DEPARTMENT");
+        Department department = new Department(null, "Calçados");
+        System.out.println("Antes de salvar: " + department);
+        System.out.println("Depois de salvo: " + departmentDAO.save(department));
+
+        System.out.println("\n##### ATUALIZAR DEPARTMENT");
+        department.setName("footwear");
+        System.out.println("Depois de atualizar: " + departmentDAO.update(department));
+
+        System.out.println("\n##### DELETAR DEPARTMENT");
+        departmentDAO.deleteById(department.getId());
+        System.out.println("Lista de departments após deletar");
+        departmentDAO.findAll().forEach(System.out::println);
     }
 
 }

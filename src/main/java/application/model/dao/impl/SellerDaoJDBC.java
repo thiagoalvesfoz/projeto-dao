@@ -23,7 +23,12 @@ class SellerDaoJDBC implements SellerDAO {
     }
 
     @Override
-    public Seller insert(Seller entity) {
+    public Seller save(Seller entity) {
+
+        if (entity.getId() != null) {
+            return this.update(entity);
+        }
+
         PreparedStatement st = null;
         ResultSet rs = null;
 
