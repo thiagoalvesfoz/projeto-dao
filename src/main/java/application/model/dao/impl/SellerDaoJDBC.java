@@ -7,7 +7,6 @@ import infra.Database;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,12 +66,57 @@ class SellerDaoJDBC implements SellerDAO {
 
     @Override
     public Seller update(Seller entity) {
-        return null;
+        PreparedStatement st = null;
+
+        String sql = "UPDATE seller SET name = ?, email = ?, birth_date = ?, base_salary = ?, department_id = ? " +
+                "WHERE id = ?";
+
+        try {
+            st = conn.prepareStatement(sql);
+
+            st.setInt(6, entity.getId());
+            st.setString(1, entity.getName());
+            st.setString(2, entity.getEmail());
+            st.setString(3, entity.getBirthDate().format(ofPattern("yyyy-MM-dd")));
+            st.setDouble(4, entity.getBaseSalary());
+
+            if (entity.getDepartment() != null) {
+                st.setInt(5, entity.getDepartment().getId());
+            } else {
+                st.setNull(5, Types.NULL);
+            }
+
+            if (st.executeUpdate() != 0) {
+                return entity;
+            }
+
+            throw new DaoException("No rows affected!");
+
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        } finally {
+            Database.closeStatement(st);
+        }
     }
 
     @Override
-    public void deleteById(Integer integer) {
+    public void deleteById(Integer id) {
+        PreparedStatement st = null;
+        String sql = "DELETE FROM seller WHERE id = ?;";
+        try {
+            st = conn.prepareStatement(sql);
+            st.setInt(1, id);
+            int rowsAffected = st.executeUpdate();
 
+            if (rowsAffected == 0) {
+                throw new DaoException("No rows affected!");
+            }
+
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        } finally {
+            Database.closeStatement(st);
+        }
     }
 
     @Override

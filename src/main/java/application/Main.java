@@ -2,6 +2,7 @@ package application;
 
 import application.model.dao.SellerDAO;
 import application.model.dao.impl.DaoFactory;
+import application.model.entities.Department;
 import application.model.entities.Seller;
 
 import java.time.LocalDate;
@@ -19,7 +20,6 @@ public class Main {
 
         System.out.println("\n##### BUSCA DE SELLER POR DEPARTMENT");
         List<Seller> sellerList = sellerDao.findByDepartment(seller.getDepartment());
-        ;
         sellerList.forEach(System.out::println);
 
         System.out.println("\n##### BUSCA TODOS OS SELLERS");
@@ -27,18 +27,29 @@ public class Main {
         sellerList = sellerDao.findAll();
         sellerList.forEach(System.out::println);
 
-        System.out.println("\n##### ADICIONAR SELLER");
+        System.out.println("\n##### ADICIONAR SELLER ");
         Seller sellerToSave = new Seller(
                 null,
-                "Karem Alves",
-                "karem@karem.com",
+                "Thiago Alves",
+                "thiago@thiago.com",
                 2500.00,
-                LocalDate.of(1994, 7, 10),
+                LocalDate.of(1997, 7, 13),
                 null
         );
 
         System.out.println("Antes de salvar: " + sellerToSave);
         System.out.println("Depois de salvo: " + sellerDao.insert(sellerToSave));
+
+        System.out.println("\n##### ATUALIZAR SELLER");
+        sellerToSave.setDepartment(new Department(1, null));
+        sellerDao.update(sellerToSave);
+        System.out.println("Seller atualizado para: " + sellerDao.findById(sellerToSave.getId()));
+
+        System.out.println("\n##### DELETAR SELLER");
+        sellerDao.deleteById(sellerToSave.getId());
+        System.out.println("Lista de sellers após deletar");
+        sellerList = sellerDao.findAll();
+        sellerList.forEach(System.out::println);
     }
 
 }
