@@ -3,9 +3,9 @@ package application.model.dao;
 import java.util.List;
 
 interface CRUD<T, ID> {
-    void insert(T entity);
+    T insert(T entity);
 
-    void update(T entity);
+    T update(T entity);
 
     void deleteById(ID id);
 

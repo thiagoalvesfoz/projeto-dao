@@ -5,11 +5,9 @@ import application.model.entities.Department;
 import application.model.entities.Seller;
 import infra.Database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,13 +24,50 @@ class SellerDaoJDBC implements SellerDAO {
     }
 
     @Override
-    public void insert(Seller entity) {
+    public Seller insert(Seller entity) {
+        PreparedStatement st = null;
+        ResultSet rs = null;
 
+        String sql = "INSERT INTO seller (name, email, birth_date, base_salary, department_id) " +
+                "VALUES (?, ?, ?, ?, ?);";
+
+        try {
+            st = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            st.setString(1, entity.getName());
+            st.setString(2, entity.getEmail());
+            st.setString(3, entity.getBirthDate().format(ofPattern("yyyy-MM-dd")));
+            st.setDouble(4, entity.getBaseSalary());
+
+            if (entity.getDepartment() != null) {
+                st.setInt(5, entity.getDepartment().getId());
+            } else {
+                st.setNull(5, Types.NULL);
+            }
+
+            int rowsAffected = st.executeUpdate();
+            rs = st.getGeneratedKeys();
+
+            if (rowsAffected != 0 && rs.next()) {
+
+                entity.setId(rs.getInt(1));
+                return entity;
+
+            } else {
+                throw new DaoException("Unexpected Error! No rows affected!");
+            }
+
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        } finally {
+            Database.closeStatement(st);
+            Database.closeResultSet(rs);
+        }
     }
 
     @Override
-    public void update(Seller entity) {
-
+    public Seller update(Seller entity) {
+        return null;
     }
 
     @Override
