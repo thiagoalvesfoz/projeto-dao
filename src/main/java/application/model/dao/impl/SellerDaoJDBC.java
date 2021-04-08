@@ -107,7 +107,35 @@ class SellerDaoJDBC implements SellerDAO {
 
     @Override
     public List<Seller> findAll() {
-        return null;
+        ResultSet rs = null;
+
+        String sql = "SELECT seller.*, department.name as depName FROM seller " +
+                "LEFT JOIN department ON department.id = seller.department_id " +
+                "ORDER BY seller.name;";
+
+        try {
+            rs = conn.prepareStatement(sql).executeQuery();
+
+            List<Seller> listAllSellers = new ArrayList<>();
+            Map<Integer, Department> map = new HashMap<>();
+
+            while (rs.next()) {
+                Department dep = map.get(rs.getInt("department_id"));
+
+                if (dep == null) {
+                    dep = getDepartment(rs);
+                }
+
+                listAllSellers.add(getSeller(rs, dep));
+            }
+
+            return listAllSellers;
+
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        } finally {
+            Database.closeResultSet(rs);
+        }
     }
 
     private Seller getSeller(ResultSet rs, Department department) throws SQLException {
@@ -122,9 +150,16 @@ class SellerDaoJDBC implements SellerDAO {
     }
 
     private Department getDepartment(ResultSet rs) throws SQLException {
-        return new Department(
-                rs.getInt("department_id"),
-                rs.getString("depName")
-        );
+
+        int idDepartment = rs.getInt("department_id");
+
+        if (idDepartment != 0) {
+            return new Department(
+                    idDepartment,
+                    rs.getString("depName")
+            );
+        }
+
+        return null;
     }
 }
